@@ -39,29 +39,34 @@ namespace MeshTemplates
     namespace Triangle
     {
         std::vector<float> vertices = {
-            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f 
+            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // 0
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // 1
+            0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f  // 2
         };
         std::vector<unsigned int> indices = {
+            // front face
             0, 1, 2
         };
     };
     namespace Square
     {
         std::vector<float> vertices = {
-            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-            -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // 0
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // 1
+            0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // 2
+            -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, // 3
         };
         std::vector<unsigned int> indices = {
+            // first triangle
             0, 1, 2,
+
+            // second triangle
             2, 3, 0
         };
     };
 };
 
+/// @brief A small placeholder class to manage mesh instances
 class Mesh
 {
 private:
@@ -83,6 +88,8 @@ public:
     ~Mesh();
 };
 
+/// @brief Sets the classes vertices and tests them to make sure they're none zero
+/// @param value The value to set the vertices to
 inline void Mesh::setVertices(std::vector<float> value)
 {
     if (value.size() < 0)
@@ -93,6 +100,8 @@ inline void Mesh::setVertices(std::vector<float> value)
     vertices = value;
 }
 
+/// @brief Sets the classes indices and tests them to make sure they're none zero
+/// @param value The value to set the indices to
 inline void Mesh::setIndices(std::vector<unsigned int> value)
 {
     if (value.size() < 0)
@@ -103,6 +112,8 @@ inline void Mesh::setIndices(std::vector<unsigned int> value)
     indices = value;
 }
 
+/// @brief Renders the mesh to the screen using the projection, view, and transform matricies
+/// @param pv Projection * View
 inline void Mesh::render(glm::mat4 pv)
 {
     glBindVertexArray(VAO);
@@ -111,6 +122,9 @@ inline void Mesh::render(glm::mat4 pv)
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }
 
+/// @brief The default contstructor of the Mesh class
+/// @param verts The vertices to be generated
+/// @param inds The indices to be generated
 Mesh::Mesh(std::vector<float> verts, std::vector<unsigned int> inds)
 {
     setVertices(verts);
@@ -135,6 +149,7 @@ Mesh::Mesh(std::vector<float> verts, std::vector<unsigned int> inds)
     glEnableVertexAttribArray(1);
 }
 
+/// @brief The default destrctor that cleans up memory
 Mesh::~Mesh()
 {
     glDeleteVertexArrays(1, &VAO);

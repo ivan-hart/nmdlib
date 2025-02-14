@@ -9,50 +9,67 @@
 
 #include "mesh.hpp"
 
-int main(int _argc, char **_argv)
+SDL_Window * window;
+SDL_GLContext ctx;
+std::string path;
+
+bool init()
 {
-    std::string path = SDL_GetBasePath();
+    path = SDL_GetBasePath();
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         SDL_Log("ERROR!: Failed to initalize SDL! %s", SDL_GetError());
-        return -1;
+        return false;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 
-    SDL_Window * window = SDL_CreateWindow("Test Window", 800, 450, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+    window = SDL_CreateWindow("Test Window", 800, 450, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
     if (!window)
     {
         SDL_Log("ERROR!: Failed to initalize SDL! %s", SDL_GetError());
-        SDL_Quit();
-        return -1;
+        return false;
     }
 
-    SDL_GLContext ctx = SDL_GL_CreateContext(window);
+    ctx = SDL_GL_CreateContext(window);
     if (!ctx)
     {
         SDL_Log("ERROR!: Failed to create GL context! %s", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return -1;
+        return false;
     }
 
     int glVersion = gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
     if (glVersion == 0)
     {
         SDL_Log("ERROR!: Failed to initialize GLAD! %s", glGetError());
-        SDL_GL_DestroyContext(ctx);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return -1;
+        return false;
     }
 
     glEnable(GL_DEPTH_TEST);
     glViewport(0, 0, 800, 450);
     glClearColor(0.4, 0.6, 1.0, 1.0);
+
+    return true;
+}
+
+void cleanup()
+{
+    SDL_DestroyWindow(window);
+    SDL_GL_DestroyContext(ctx);
+    SDL_Quit();
+}
+
+int main(int _argc, char **_argv)
+{
+    if (!init())
+    {
+        SDL_Log("ERROR!: Failed to initialize the applicaiton!");
+        cleanup();
+        return -1;
+    }
 
     Mesh pyrimidMesh(MeshTemplates::Pyrimid::vertices, MeshTemplates::Pyrimid::indices);
     pyrimidMesh.transform = glm::mat4(1.0f);
@@ -94,9 +111,7 @@ int main(int _argc, char **_argv)
         SDL_Delay(16);
     }
 
-    SDL_GL_DestroyContext(ctx);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    cleanup();
 
     return 0;
 }
