@@ -10,6 +10,7 @@
 #include <SDL3/SDL_opengl.h>
 #include <glm/ext.hpp>
 
+#include "node.hpp"
 #include "shader.hpp"
 
 namespace MeshTemplates
@@ -67,7 +68,7 @@ namespace MeshTemplates
 };
 
 /// @brief A small placeholder class to manage mesh instances
-class Mesh
+class Mesh : public Node
 {
 private:
     std::vector<float> vertices;
@@ -75,14 +76,10 @@ private:
 
     unsigned int VAO, VBO, EBO;
 public:
-    glm::mat4 transform;
-
     Shader shader;
 
     void setVertices(std::vector<float> value);
     void setIndices(std::vector<unsigned int> value);
-
-    void render(glm::mat4 pvm);
 
     Mesh(std::vector<float> verts, std::vector<unsigned int> inds);
     ~Mesh();
@@ -112,16 +109,6 @@ inline void Mesh::setIndices(std::vector<unsigned int> value)
     indices = value;
 }
 
-/// @brief Renders the mesh to the screen using the projection, view, and transform matricies
-/// @param pv Projection * View
-inline void Mesh::render(glm::mat4 pv)
-{
-    glBindVertexArray(VAO);
-    shader.use();
-    shader.setUniformMat4("pvm", pv * transform);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-}
-
 /// @brief The default contstructor of the Mesh class
 /// @param verts The vertices to be generated
 /// @param inds The indices to be generated
@@ -147,6 +134,19 @@ Mesh::Mesh(std::vector<float> verts, std::vector<unsigned int> inds)
 
     glVertexAttribPointer(1, 3, GL_FLOAT, 0, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    this->update = [this](float dt)
+    {
+        this->transform = glm::rotate(this->transform, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    };
+
+    this->render = [this](glm::mat4 pv)
+    {
+        glBindVertexArray(this->VAO);
+        this->shader.use();
+        this->shader.setUniformMat4("pvm", pv * this->transform);
+        glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+    };
 }
 
 /// @brief The default destrctor that cleans up memory
