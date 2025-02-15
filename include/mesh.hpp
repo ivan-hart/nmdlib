@@ -76,6 +76,9 @@ private:
 
     unsigned int VAO, VBO, EBO;
 public:
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+
     Shader shader;
 
     void setVertices(std::vector<float> value);
@@ -135,13 +138,16 @@ Mesh::Mesh(std::vector<float> verts, std::vector<unsigned int> inds)
     glVertexAttribPointer(1, 3, GL_FLOAT, 0, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    this->update = [this](float dt)
+    this->update = [this](float dt) -> void
     {
-        this->transform = glm::rotate(this->transform, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        SDL_Log("ACTION PERFORMED: user update called on node: %s", name.c_str());
+        // this->transform = glm::rotate(this->transform, glm::radians(1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     };
 
-    this->render = [this](glm::mat4 pv)
+    this->render = [this](glm::mat4 pv) -> void
     {
+        SDL_Log("rendered: %s", name);
+
         glBindVertexArray(this->VAO);
         this->shader.use();
         this->shader.setUniformMat4("pvm", pv * this->transform);

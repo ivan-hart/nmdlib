@@ -39,6 +39,7 @@ inline bool Node::add_child(std::shared_ptr<Node> node)
         }
     }
 
+    SDL_Log("%s ADDED TO: %s", node->name.c_str(), name.c_str());
     children.push_back(node);
     return true;
 }
@@ -55,20 +56,20 @@ inline std::shared_ptr<Node> Node::get_child(std::string name)
     return NULL;
 }
 
-void Node::n_update(float dt)
+inline void Node::n_update(float dt)
 {
+    SDL_Log("ACTION PERFORMED: n_update called on node: %s", this->name.c_str());
     if (update)
     {
         this->update(dt);
     }
-
     for (auto i : this->children)
     {
         i->n_update(dt);
     }
 }
 
-void Node::n_render(glm::mat4 pv)
+inline void Node::n_render(glm::mat4 pv)
 {
     if (render)
     {
