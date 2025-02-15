@@ -5,31 +5,43 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(test VERSION "0.0.1" LANGUAGES C CXX)
 
-# Include FetchContent module
+# Include FetchContent module for potential dependency fetching
 include(FetchContent)
 
-# Fetch and build SDL3
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG main
-)
-FetchContent_MakeAvailable(SDL3)
+# Try to find system-installed SDL3
+find_package(SDL3 QUIET)
+if(NOT SDL3_FOUND)
+    message(STATUS "SDL3 not found - fetching from repository")
+    FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG main
+    )
+    FetchContent_MakeAvailable(SDL3)
+endif()
 
-# Fetch and build assimp
-FetchContent_Declare(
-    assimp
-    GIT_REPOSITORY https://github.com/assimp/assimp.git
-    GIT_TAG v5.4.3
-)
-FetchContent_MakeAvailable(assimp)
+# Try to find system-installed assimp (v5.4.3)
+find_package(assimp 5.4.3 QUIET)
+if(NOT assimp_FOUND)
+    message(STATUS "assimp 5.4.3 not found - fetching from repository")
+    FetchContent_Declare(
+        assimp
+        GIT_REPOSITORY https://github.com/assimp/assimp.git
+        GIT_TAG v5.4.3
+    )
+    FetchContent_MakeAvailable(assimp)
+endif()
 
-# Fetch glm (header-only library)
-FetchContent_Declare(
-    glm
-    GIT_REPOSITORY https://github.com/icaven/glm.git
-)
-FetchContent_MakeAvailable(glm)
+# Try to find system-installed glm
+find_package(glm QUIET)
+if(NOT glm_FOUND)
+    message(STATUS "glm not found - fetching from repository")
+    FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/icaven/glm.git
+    )
+    FetchContent_MakeAvailable(glm)
+endif()
 
 # Source files
 set(SOURCES
@@ -47,8 +59,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     GL  # OpenGL is system-provided
 )
 
-# Include glm headers (header-only library)
-target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# Handle glm dependencies
+if(glm_FOUND)
+    # Use system-installed glm through its imported target
+    target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
+else()
+    # Use fetched glm by including its source directory
+    target_include_directories(${PROJECT_NAME} PRIVATE ${glm_SOURCE_DIR})
+endif()
+
+# Include project's own headers
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Copy assets to build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
