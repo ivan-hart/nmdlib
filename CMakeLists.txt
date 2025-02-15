@@ -47,6 +47,9 @@ endif()
 set(SOURCES
     src/main.cpp
     src/gl.c
+    src/nmdlib/singleton.cpp
+    src/nmdlib/shader.cpp
+    src/nmdlib/mesh.cpp
 )
 
 # Create executable

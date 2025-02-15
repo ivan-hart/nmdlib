@@ -1,5 +1,5 @@
-#ifndef SINGLETON_HPP
-#define SINGLETON_HPP
+#ifndef SINGLETON_H
+#define SINGLETON_H
 
 #include <iostream>
 
@@ -18,15 +18,5 @@ public:
 
     static T& GetInstance();
 };
-
-/// @brief A function to be called by inherited classes to retriev the only instance of said class for the lifetime of the application
-/// @tparam T The inherited class's type
-/// @return The inherited class's single instance
-template <typename T>
-inline T &Singleton<T>::GetInstance()
-{
-    static T instance;
-    return instance;
-}
 
 #endif
