@@ -5,7 +5,7 @@ Shader::~Shader()
     glDeleteProgram(ID);
 }
 
-uint Shader::load_shader_from_file(std::string path)
+unsigned int Shader::load_shader_from_file(std::string path)
 {
     std::ifstream file;
     file.open(path);

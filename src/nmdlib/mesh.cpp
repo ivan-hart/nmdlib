@@ -13,10 +13,10 @@ namespace MeshPrimitives
     };
 };
 
-Mesh::Mesh(std::vector<float> vertices, std::vector<uint> indices)
+Mesh::Mesh(InitProps props)
 {
-    this->vertices = vertices;
-    this->indices = indices;
+    this->vertices = props.vertices;
+    this->indices = props.indices;
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -32,6 +32,13 @@ Mesh::Mesh(std::vector<float> vertices, std::vector<uint> indices)
 
     glVertexAttribPointer(0, 3, GL_FLOAT, 0, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    Material::InitProps materialInitProps = {};
+    materialInitProps.shader_name = "basic";
+    materialInitProps.base_path = props.base_path;
+    material.init(materialInitProps);
+
+    transform = glm::mat4(1.0f);
 }
 
 Mesh::Mesh(std::string path)
@@ -46,13 +53,26 @@ Mesh::~Mesh()
     glDeleteBuffers(1, &EBO);
 }
 
+void Mesh::setTransform(glm::mat4 value)
+{
+    transform = value;
+}
+
+glm::mat4 Mesh::getTransform()
+{
+    return transform;
+}
+
 void Mesh::load_from_file(std::string path)
 {
     // do nothing for now
 }
 
-void Mesh::render()
+void Mesh::render(RenderProps props)
 {
+    Material::BindProps materialBindProps =  {.pvm = props.projection * props.view * transform };
+    material.bindMaterial(materialBindProps);
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }

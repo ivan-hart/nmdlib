@@ -17,6 +17,8 @@
 // class Node; // a base class for all game objects that contains a init, update, and render function
 // class Engine; // a class that manages the game's lifecycle and obejcts, will act as a singleton
 // class Camera; // a class that manages the main camera for the game, will act as a singleton
+// class texture; // a class that stores and manages all texutres made in the program
+// class Material; // a class that stores information for shaders and textures
 
 int main(int _argc, char **_argv)
 {
@@ -60,14 +62,18 @@ int main(int _argc, char **_argv)
         return -1;
     }
 
-    Shader shader;
-    shader.load(base_path + "assets/shaders/basic.vert.glsl", base_path + "assets/shaders/basic.frag.glsl");
-
-    Mesh mesh(MeshPrimitives::Triangle::vertices, MeshPrimitives::Triangle::indices);
-
     glEnable(GL_DEPTH_TEST);
     glViewport(0, 0, 800, 450);
     glClearColor(0.4f, 0.6f, 0.8f, 1.0f);
+
+    glm::mat4 projection = glm::perspective(glm::radians(60.0f), 800.0f / 450.0f, 0.01f, 100.0f);
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+
+    Mesh::InitProps meshInitProps = {};
+    meshInitProps.base_path = base_path;
+    meshInitProps.vertices = MeshPrimitives::Triangle::vertices;
+    meshInitProps.indices = MeshPrimitives::Triangle::indices;
+    Mesh mesh(meshInitProps);
 
     SDL_ShowWindow(window);
 
@@ -87,8 +93,10 @@ int main(int _argc, char **_argv)
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
-        mesh.render();
+        Mesh::RenderProps meshRenderProps = {};
+        meshRenderProps.projection = projection;
+        meshRenderProps.view = view;
+        mesh.render(meshRenderProps);
 
         SDL_GL_SwapWindow(window);
     }

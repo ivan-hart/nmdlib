@@ -15,7 +15,7 @@ public:
 
     unsigned int ID;
 
-    uint load_shader_from_file(std::string path);
+    unsigned int load_shader_from_file(std::string path);
     void load(std::string vert_path, std::string frag_path);
     void use();
     void setMatrix4fv(std::string name, glm::mat4 value);
